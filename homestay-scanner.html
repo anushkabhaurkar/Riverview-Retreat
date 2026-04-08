@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeStay Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --warm: #E8DDD0;
+    --clay: #C4A882;
+    --earth: #7A5C3A;
+    --deep: #2C1F0E;
+    --forest: #3A5A40;
+    --sage: #8BA888;
+    --sky: #4A7FA5;
+    --accent: #D4845A;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--deep);
+    min-height: 100vh;
+  }
+
+  /* Hero Header */
+  .hero {
+    background: var(--deep);
+    padding: 3rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(196,168,130,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse at 80% 20%, rgba(58,90,64,0.22) 0%, transparent 60%);
+  }
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .brand-icon {
+    width: 42px; height: 42px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--cream);
+    letter-spacing: 0.02em;
+  }
+  .brand-name span { color: var(--clay); }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    color: var(--white);
+    line-height: 1.15;
+    font-weight: 700;
+    max-width: 560px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--clay);
+  }
+  .hero p {
+    margin-top: 1rem;
+    color: rgba(247,243,238,0.65);
+    font-size: 1rem;
+    font-weight: 300;
+    max-width: 440px;
+    line-height: 1.65;
+  }
+  .stats-row {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+  .stat { }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--clay);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: rgba(247,243,238,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 3px;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--warm);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(44,31,14,0.06);
+  }
+  .filter-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--clay);
+    font-weight: 500;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 30px;
+    border: 1.5px solid var(--warm);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--deep);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--clay); color: var(--earth); }
+  .filter-btn.active { background: var(--deep); border-color: var(--deep); color: var(--cream); }
+
+  /* Grid */
+  .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .results-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--deep);
+  }
+  .results-count {
+    font-size: 0.82rem;
+    color: var(--clay);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Card */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--warm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    animation: fadeUp 0.5s ease both;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(44,31,14,0.12);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-img-wrap {
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+    background: var(--warm);
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .card:hover .card-img-wrap img { transform: scale(1.05); }
+
+  .card-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--earth);
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .card-badge.available { color: var(--forest); }
+  .card-badge.booked { color: #B05030; }
+
+  .card-fav {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    border: none;
+    transition: transform 0.2s;
+  }
+  .card-fav:hover { transform: scale(1.15); }
+
+  .card-price {
+    position: absolute;
+    bottom: 12px; right: 12px;
+    background: var(--deep);
+    color: var(--cream);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
+  .card-price span { font-size: 0.65rem; font-family: 'DM Sans'; font-weight: 300; opacity: 0.7; }
+
+  .card-body { padding: 1rem 1.1rem 1.1rem; }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--clay);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .card-meta .dot { width: 3px; height: 3px; background: var(--warm); border-radius: 50%; }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--deep);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .card-desc {
+    font-size: 0.82rem;
+    color: #6B5540;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+
+  .card-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+  .amenity {
+    background: var(--cream);
+    border: 1px solid var(--warm);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.7rem;
+    color: var(--earth);
+  }
+
+  .card-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+  }
+  .stars { color: #E6A832; letter-spacing: -1px; }
+  .rating-val { font-weight: 500; color: var(--deep); }
+  .rating-count { color: #9A8070; }
+
+  .card-footer {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--warm);
+    padding-top: 12px;
+  }
+  .btn-location {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    background: var(--forest);
+    color: white;
+    border-radius: 9px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-location:hover { background: #2D4830; transform: scale(0.98); }
+
+  .btn-details {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    background: transparent;
+    border: 1.5px solid var(--warm);
+    color: var(--earth);
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-details:hover { border-color: var(--clay); background: var(--cream); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,31,14,0.6);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 20px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn {
+    from { transform: scale(0.94) translateY(16px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-img { width: 100%; height: 240px; object-fit: cover; border-radius: 20px 20px 0 0; }
+  .modal-body { padding: 1.5rem; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 6px; }
+  .modal-location { font-size: 0.82rem; color: var(--clay); margin-bottom: 1rem; }
+  .modal-desc { font-size: 0.9rem; line-height: 1.65; color: #5C4733; margin-bottom: 1.2rem; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.2rem; }
+  .modal-stat { background: var(--cream); border-radius: 10px; padding: 10px 14px; }
+  .modal-stat-val { font-weight: 600; font-size: 1rem; color: var(--deep); }
+  .modal-stat-label { font-size: 0.72rem; color: var(--clay); margin-top: 2px; }
+  .modal-amenities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.4rem; }
+  .modal-close {
+    width: 100%;
+    padding: 12px;
+    background: var(--deep);
+    color: var(--cream);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .modal-close:hover { background: var(--earth); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .hero { padding: 2rem 1.2rem 2rem; }
+    .container { padding: 1.5rem 1.2rem 3rem; }
+    .filter-bar { padding: 0.8rem 1.2rem; }
+  }
+
+  /* No results */
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--clay); }
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--earth); }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <div class="brand-icon">🏡</div>
+      <div class="brand-name">Home<span>Stay</span> Scanner</div>
+    </div>
+    <h1>Find your perfect <em>home away</em> from home</h1>
+    <p>Curated homestays with authentic local experiences. Browse verified properties with photos, amenities, and directions.</p>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num">24</div>
+        <div class="stat-label">Properties</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">8</div>
+        <div class="stat-label">Locations</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4.8★</div>
+        <div class="stat-label">Avg rating</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="filterCards('all', this)">All</button>
+    <button class="filter-btn" onclick="filterCards('hill', this)">🏔 Hill Station</button>
+    <button class="filter-btn" onclick="filterCards('beach', this)">🏖 Beachside</button>
+    <button class="filter-btn" onclick="filterCards('forest', this)">🌿 Forest</button>
+    <button class="filter-btn" onclick="filterCards('heritage', this)">🏛 Heritage</button>
+    <button class="filter-btn" onclick="filterCards('available', this)">✅ Available Now</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+  <div class="results-header">
+    <div class="results-title">Homestays</div>
+    <div class="results-count" id="resultsCount">6 properties found</div>
+  </div>
+
+  <div class="grid" id="cardGrid"></div>
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <h3>No properties found</h3>
+    <p>Try a different filter to explore more options.</p>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <img id="modalImg" src="" alt="" class="modal-img">
+    <div class="modal-body">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-location" id="modalLoc"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-grid" id="modalGrid"></div>
+      <div class="modal-amenities" id="modalAmenities"></div>
+      <a id="modalMapLink" href="#" target="_blank" style="display:block;text-align:center;background:var(--forest);color:white;border-radius:10px;padding:12px;text-decoration:none;font-size:0.9rem;font-weight:500;margin-bottom:10px;">📍 Open in Google Maps</a>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const properties = [
+  {
+    id: 1,
+    title: "Misty Pines Cottage",
+    type: "hill",
+    location: "Coorg, Karnataka",
+    region: "Hill Station",
+    desc: "A cozy wooden cottage nestled among coffee plantations with panoramic valley views. Wake up to misty mornings and birdsong.",
+    longDesc: "This charming 2-bedroom cottage sits at 1,200m elevation surrounded by lush coffee and spice estates. The property offers guided plantation walks, bonfire evenings, and authentic Kodava cuisine prepared by the host family. Perfect for couples and small families seeking a peaceful retreat.",
+    img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=80",
+    price: "₹3,200",
+    rating: 4.9,
+    reviews: 87,
+    status: "available",
+    guests: 4,
+    bedrooms: 2,
+    amenities: ["WiFi", "Bonfire", "Breakfast", "Parking", "Hot water"],
+    mapUrl: "https://maps.google.com/?q=Coorg+Karnataka+India",
+    coords: "12.3375° N, 75.8069° E"
+  },
+  {
+    id: 2,
+    title: "The Blue Lagoon House",
+    type: "beach",
+    location: "Varkala, Kerala",
+    region: "Beachside",
+    desc: "Cliffside living with direct access to the famous Varkala beach. Watch sunsets from your private terrace over the Arabian Sea.",
+    longDesc: "Perched on the dramatic red laterite cliffs of Varkala, this 3-bedroom villa offers uninterrupted sea views from every room. The property includes a rooftop terrace, outdoor shower, and beach gear rental. The host organizes yoga sessions and Ayurvedic treatments on request.",
+    img: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=600&q=80",
+    price: "₹4,800",
+    rating: 4.8,
+    reviews: 124,
+    status: "available",
+    guests: 6,
+    bedrooms: 3,
+    amenities: ["Sea view", "Terrace", "Yoga", "Beach access", "AC"],
+    mapUrl: "https://maps.google.com/?q=Varkala+Kerala+India",
+    coords: "8.7379° N, 76.7163° E"
+  },
+  {
+    id: 3,
+    title: "Bamboo Grove Retreat",
+    type: "forest",
+    location: "Wayanad, Kerala",
+    region: "Forest",
+    desc: "Eco-friendly bamboo cottages in the heart of a private forest reserve, with resident wildlife and organic farm meals.",
+    longDesc: "This award-winning eco-stay features four bamboo cottages built without a single nail, using traditional Adivasi techniques. Solar-powered, with rainwater harvesting and a zero-waste kitchen. The resident naturalist conducts night wildlife walks and birdwatching sessions at dawn.",
+    img: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=600&q=80",
+    price: "₹2,900",
+    rating: 4.9,
+    reviews: 63,
+    status: "available",
+    guests: 2,
+    bedrooms: 1,
+    amenities: ["Eco-lodge", "Wildlife walks", "Organic meals", "No plastic", "Bonfire"],
+    mapUrl: "https://maps.google.com/?q=Wayanad+Kerala+India",
+    coords: "11.6854° N, 76.1320° E"
+  },
+  {
+    id: 4,
+    title: "The Haveli on the Hill",
+    type: "heritage",
+    location: "Jodhpur, Rajasthan",
+    region: "Heritage",
+    desc: "A 200-year-old restored merchant haveli with hand-painted frescoes, courtyards, and sweeping views of the Blue City.",
+    longDesc: "This magnificent 8-room heritage property has been in the same family for seven generations. Each room features original Rajasthani frescoes, antique furniture, and private sit-outs. The hosts offer classical folk music evenings, cooking classes, and guided heritage walks through the old city.",
+    img: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80",
+    price: "₹6,500",
+    rating: 4.7,
+    reviews: 211,
+    status: "booked",
+    guests: 8,
+    bedrooms: 4,
+    amenities: ["Heritage property", "Folk music", "Cooking class", "Rooftop", "AC"],
+    mapUrl: "https://maps.google.com/?q=Jodhpur+Rajasthan+India",
+    coords: "26.2389° N, 73.0243° E"
+  },
+  {
+    id: 5,
+    title: "Spice Garden Homestay",
+    type: "forest",
+    location: "Munnar, Kerala",
+    region: "Forest",
+    desc: "Set among tea and cardamom estates at 1,800m, with cloud-level views and the freshest mountain air you'll ever breathe.",
+    longDesc: "Owned by a third-generation tea planter, this hillside homestay offers an intimate window into Kerala's plantation life. Guests can join the morning tea-plucking rounds, visit the estate's own processing unit, and enjoy meals made entirely from garden produce. Two spacious rooms with wood-panelled interiors.",
+    img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+    price: "₹2,600",
+    rating: 4.8,
+    reviews: 96,
+    status: "available",
+    guests: 4,
+    bedrooms: 2,
+    amenities: ["Tea estate tour", "Home-cooked meals", "Trekking", "Hot water", "Parking"],
+    mapUrl: "https://maps.google.com/?q=Munnar+Kerala+India",
+    coords: "10.0889° N, 77.0595° E"
+  },
+  {
+    id: 6,
+    title: "Lighthouse Keeper's Bungalow",
+    type: "beach",
+    location: "Gokarna, Karnataka",
+    region: "Beachside",
+    desc: "A colonial-era bungalow adjacent to the historic lighthouse — the most unique address on the Konkan coast.",
+    longDesc: "This extraordinary property was originally built for the British lighthouse superintendent in 1923. Fully restored with period furniture, it sleeps up to 10 guests across 5 rooms. The private beach path leads to Om Beach, one of India's most pristine stretches of sand. A caretaker couple provides optional meals.",
+    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80",
+    price: "₹5,200",
+    rating: 4.9,
+    reviews: 48,
+    status: "available",
+    guests: 10,
+    bedrooms: 5,
+    amenities: ["Private beach path", "Heritage bungalow", "Caretaker", "BBQ", "WiFi"],
+    mapUrl: "https://maps.google.com/?q=Gokarna+Karnataka+India",
+    coords: "14.5479° N, 74.3188° E"
+  }
+];
+
+let activeFilter = 'all';
+
+function renderCards(filter) {
+  const grid = document.getElementById('cardGrid');
+  const empty = document.getElementById('emptyState');
+  const countEl = document.getElementById('resultsCount');
+
+  let filtered = properties;
+  if (filter === 'available') {
+    filtered = properties.filter(p => p.status === 'available');
+  } else if (filter !== 'all') {
+    filtered = properties.filter(p => p.type === filter);
+  }
+
+  countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? 'y' : 'ies'} found`;
+
+  if (filtered.length === 0) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+
+  grid.style.display = 'grid';
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="card" style="animation-delay:${i * 0.07}s" data-type="${p.type}">
+      <div class="card-img-wrap">
+        <img src="${p.img}" alt="${p.title}" loading="lazy">
+        <span class="card-badge ${p.status}">${p.status === 'available' ? '✓ Available' : '✗ Booked'}</span>
+        <button class="card-fav" onclick="toggleFav(this)">🤍</button>
+        <div class="card-price">${p.price} <span>/ night</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-meta">
+          <span>${p.region}</span>
+          <span class="dot"></span>
+          <span>${p.location}</span>
+        </div>
+        <div class="card-title">${p.title}</div>
+        <div class="card-desc">${p.desc}</div>
+        <div class="card-amenities">
+          ${p.amenities.slice(0,4).map(a => `<span class="amenity">${a}</span>`).join('')}
+          ${p.amenities.length > 4 ? `<span class="amenity">+${p.amenities.length - 4} more</span>` : ''}
+        </div>
+        <div class="card-rating">
+          <span class="stars">${'★'.repeat(Math.floor(p.rating))}${'☆'.repeat(5 - Math.floor(p.rating))}</span>
+          <span class="rating-val">${p.rating}</span>
+          <span class="rating-count">(${p.reviews} reviews)</span>
+        </div>
+        <div class="card-footer">
+          <a class="btn-location" href="${p.mapUrl}" target="_blank">📍 View on Map</a>
+          <button class="btn-details" onclick="openModal(${p.id})">Details →</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleFav(btn) {
+  btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
+}
+
+function filterCards(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(filter);
+}
+
+function openModal(id) {
+  const p = properties.find(x => x.id === id);
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalTitle').textContent = p.title;
+  document.getElementById('modalLoc').textContent = `📍 ${p.location}  ·  🌐 ${p.coords}`;
+  document.getElementById('modalDesc').textContent = p.longDesc;
+  document.getElementById('modalGrid').innerHTML = `
+    <div class="modal-stat"><div class="modal-stat-val">${p.price}</div><div class="modal-stat-label">per night</div></div>
+    <div class="modal-stat"><div class="modal-stat-val">${p.rating} ★</div><div class="modal-stat-label">${p.reviews} reviews</div></div>
+    <div class="modal-stat"><div class="modal-stat-val">${p.bedrooms} BR</div><div class="modal-stat-label">bedrooms</div></div>
+    <div class="modal-stat"><div class="modal-stat-val">${p.guests} guests</div><div class="modal-stat-label">max capacity</div></div>
+  `;
+  document.getElementById('modalAmenities').innerHTML = p.amenities.map(a => `<span class="amenity">${a}</span>`).join('');
+  document.getElementById('modalMapLink').href = p.mapUrl;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open');
+});
+
+renderCards('all');
+</script>
+</body>
+</html>
